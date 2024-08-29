@@ -1,36 +1,57 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useQuery } from "react-query"
 import { fetchJokes } from "../api/api"
 import JokeCard from "../components/card"
+import { useRouter } from "next/navigation"
 
 const SearchPage = () => {
-  const [query, setQuery] = useState("")
+  const router = useRouter()
+  const query = router.query || "" // Извлечение значения query из router.query
+
+  const [searchQuery, setSearchQuery] = useState(query)
+
+  useEffect(() => {
+    if (query) {
+      setSearchQuery(query) // Обновляю локальный state при изменении query в URL
+    }
+  }, [query])
+
   const {
     data: jokes,
     isLoading,
     error,
-  } = useQuery(["jokes", query], () => fetchJokes(query), {
-    enabled: query.length >= 4,
+  } = useQuery(["jokes", searchQuery], () => fetchJokes(searchQuery), {
+    enabled: typeof searchQuery === "string" && searchQuery.length >= 4, // Запрос выполняется только если searchQuery является строкой и длина >= 4
   })
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    setQuery(e.target.value)
+  console.log(jokes)
+  const handleInputChange = (e) => {
+    const inputQuery = e.target.value
+    setSearchQuery(inputQuery)
+
+    // Обнов адресную строку без перезагрузки
+    const url = new URL(window.location)
+    url.searchParams.set("query", inputQuery)
+    window.history.pushState({}, "", url)
   }
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Search Jokes</h1>
-      <form onChange={handleSearch}>
+      <h1>Поиск шуток</h1>
+      <form>
         <input
           type="text"
           name="query"
-          placeholder="Search Jokes"
+          placeholder="Поиск шуток"
+          value={searchQuery} // Использ state
+          onChange={handleInputChange}
           style={{ padding: "8px", width: "300px", marginRight: "8px" }}
         />
-        <button type="submit">Поиск</button>
+        <button type="button" onClick={() => router.push(`/search?query=${searchQuery}`)}>
+          Поиск
+        </button>
       </form>
 
       {isLoading && <p>Загрузка...</p>}
