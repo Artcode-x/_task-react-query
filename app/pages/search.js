@@ -2,28 +2,28 @@
 
 import React, { useEffect, useState } from "react"
 import { useQuery } from "react-query"
-import { fetchJokes } from "../api/api"
 import JokeCard from "../components/card"
 import { useRouter } from "next/navigation"
+import { fetchJokes } from "../api/api"
 
 const SearchPage = () => {
   const router = useRouter()
-  const query = router.query || "" // Извлечение значения query из router.query
-
-  const [searchQuery, setSearchQuery] = useState(query)
+  const initialQuery = router.query || ""
+  const [searchQuery, setSearchQuery] = useState(initialQuery)
 
   useEffect(() => {
-    if (query) {
-      setSearchQuery(query) // Обновляю локальный state при изменении query в URL
+    if (typeof window !== "undefined") {
+      window.history.pushState({}, "", "/search")
     }
-  }, [query])
+    setSearchQuery(initialQuery)
+  }, [initialQuery])
 
   const {
     data: jokes,
     isLoading,
     error,
   } = useQuery(["jokes", searchQuery], () => fetchJokes(searchQuery), {
-    enabled: typeof searchQuery === "string" && searchQuery.length >= 4, // Запрос выполняется только если searchQuery является строкой и длина >= 4
+    enabled: typeof searchQuery === "string" && searchQuery.length >= 4,
   })
 
   const handleInputChange = (e) => {
@@ -34,6 +34,8 @@ const SearchPage = () => {
     const url = new URL(window.location.origin + "/search")
     if (inputQuery) {
       url.searchParams.set("query", inputQuery)
+    } else {
+      url.searchParams.delete("query") // Удаляем параметр, если пусто
     }
     window.history.pushState({}, "", url)
   }
