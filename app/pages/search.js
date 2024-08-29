@@ -26,14 +26,15 @@ const SearchPage = () => {
     enabled: typeof searchQuery === "string" && searchQuery.length >= 4, // Запрос выполняется только если searchQuery является строкой и длина >= 4
   })
 
-  console.log(jokes)
   const handleInputChange = (e) => {
     const inputQuery = e.target.value
     setSearchQuery(inputQuery)
 
-    // Обнов адресную строку без перезагрузки
-    const url = new URL(window.location)
-    url.searchParams.set("query", inputQuery)
+    // Обновляем адресную строку без перезагрузки
+    const url = new URL(window.location.origin + "/search")
+    if (inputQuery) {
+      url.searchParams.set("query", inputQuery)
+    }
     window.history.pushState({}, "", url)
   }
 
@@ -45,7 +46,7 @@ const SearchPage = () => {
           type="text"
           name="query"
           placeholder="Поиск шуток"
-          value={searchQuery} // Использ state
+          value={searchQuery}
           onChange={handleInputChange}
           style={{ padding: "8px", width: "300px", marginRight: "8px" }}
         />
