@@ -41,29 +41,78 @@ const SearchPage = () => {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Поиск шуток</h1>
-      <form>
+    <div style={styles.container}>
+      <form style={styles.form}>
         <input
           type="text"
           name="query"
           placeholder="Поиск шуток"
           value={searchQuery}
           onChange={handleInputChange}
-          style={{ padding: "8px", width: "300px", marginRight: "8px" }}
+          style={styles.input}
         />
-        <button type="button" onClick={() => router.push(`/search?query=${searchQuery}`)}>
+        {/* <button
+          type="button"
+          onClick={() => router.push(`/search?query=${searchQuery}`)}
+          style={styles.button}
+        >
           Поиск
-        </button>
+        </button> */}
       </form>
 
       {isLoading && <p>Загрузка...</p>}
-      {error && <p>Ошибка при получении шуток: {error.message}</p>}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+      {error && <p style={styles.error}>Ошибка при получении шуток: {error.message}</p>}
+
+      <div style={styles.jokeGrid}>
         {jokes && jokes.map((joke) => <JokeCard key={joke.id} joke={joke.value} />)}
       </div>
     </div>
   )
 }
 
+const styles = {
+  container: {
+    marginTop: "10%",
+    padding: "40px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+    margin: "0 auto",
+  },
+
+  form: {
+    display: "flex",
+  },
+  input: {
+    padding: "20px",
+    width: "-webkit-fill-available",
+    border: "1px solid #ccc",
+    borderRadius: "14px",
+    fontSize: "16px",
+    marginRight: "10px",
+    color: "#656ec2",
+  },
+  button: {
+    padding: "10px 15px",
+    backgroundColor: "#0070f3",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "16px",
+    transition: "background-color 0.3s",
+  },
+  buttonHover: {
+    backgroundColor: "#005bb5",
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+  },
+  jokeGrid: {
+    marginTop: "2%",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px",
+  },
+}
 export default SearchPage
