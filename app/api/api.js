@@ -5,5 +5,7 @@ export const fetchJokes = async (query) => {
   if (!response) {
     throw new Error("Что то не так, попробуйте позднее")
   }
-  return response.data.result
+  console.log(response.data)
+
+  return response.data
 }

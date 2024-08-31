@@ -5,11 +5,16 @@ import { useQuery } from "react-query"
 import JokeCard from "../components/card"
 import { useRouter } from "next/navigation"
 import { fetchJokes } from "../api/api"
+import { useDispatch, useSelector } from "react-redux"
+import { updateTotalCount } from "../store/reducersSlice"
+import { totalCountResults } from "../store/toolkitSelectors"
 
 const SearchPage = () => {
   const router = useRouter()
   const initialQuery = router.query || ""
   const [searchQuery, setSearchQuery] = useState(initialQuery)
+  const dispatch = useDispatch()
+  const total_count = useSelector(totalCountResults)
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -19,12 +24,25 @@ const SearchPage = () => {
   }, [initialQuery])
 
   const {
+    // data: { total = 0, result = [] } = {},
     data: jokes,
     isLoading,
     error,
   } = useQuery(["jokes", searchQuery], () => fetchJokes(searchQuery), {
     enabled: typeof searchQuery === "string" && searchQuery.length >= 4,
   })
+
+  // Деструктуризация для total и result
+  const total = jokes?.total || 0
+  const result = jokes?.result || []
+
+  useEffect(() => {
+    if (total != 0) {
+      dispatch(updateTotalCount(total))
+    } else {
+      dispatch(updateTotalCount(0))
+    }
+  }, [total])
 
   const handleInputChange = (e) => {
     const inputQuery = e.target.value
@@ -51,6 +69,7 @@ const SearchPage = () => {
           onChange={handleInputChange}
           style={styles.input}
         />
+        {`Total count: ${total_count}`}
         {/* <button
           type="button"
           onClick={() => router.push(`/search?query=${searchQuery}`)}
@@ -64,7 +83,7 @@ const SearchPage = () => {
       {error && <p style={styles.error}>Ошибка при получении шуток: {error.message}</p>}
 
       <div style={styles.jokeGrid}>
-        {jokes && jokes.map((joke) => <JokeCard key={joke.id} joke={joke.value} />)}
+        {result && result.map((joke) => <JokeCard key={joke.id} joke={joke.value} />)}
       </div>
     </div>
   )
@@ -81,6 +100,8 @@ const styles = {
 
   form: {
     display: "flex",
+    flexDirection: "column",
+    gap: "10px",
   },
   input: {
     padding: "20px",
